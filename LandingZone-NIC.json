@@ -31,7 +31,7 @@
             }
         },
         "incrementVersion" : {
-            "type" : "int"
+            "type" : "string"
         },
         "subnetRef" : {
             "type" : "string"

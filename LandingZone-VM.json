@@ -40,7 +40,7 @@
             }
         },
         "incrementVersion" : {
-            "type" : "int"
+            "type" : "string"
         },
         "NICRef" : {
             "type" : "string"
