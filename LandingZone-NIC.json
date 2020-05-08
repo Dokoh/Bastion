@@ -30,13 +30,16 @@
                 "description" : "Type of VM for which to create network interface"
             }
         },
+        "incrementVersion" : {
+            "type" : "int"
+        },
         "subnetRef" : {
             "type" : "string"
         }
     },
     "variables" : {
         "namingConvention" : "[toLower(concat(substring(parameters('customer'), 0, 4)))]",
-        "nicName" : "[if(equals(parameters('vmTypeToDeploy'),'DomainControllers'),concat(variables('namingConvention'),'srvads01-nic01'),concat(variables('namingConvention'),'_srvfrw01-nic01'))]"
+        "nicName" : "[if(equals(parameters('vmTypeToDeploy'),'DomainControllers'),concat(variables('namingConvention'),'srvads',parameters('incrementVersion'),'-nic01'),concat(variables('namingConvention'),'_srvfrw01-nic01'))]"
     },
     "resources" : [
         {
