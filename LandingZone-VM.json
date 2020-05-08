@@ -53,7 +53,7 @@
         "namingConvention" : "[toLower(concat(substring(parameters('customer'), 0, 4)))]",
         "VMType" : "ads",
         "VMName" : "[concat(variables('namingConvention'),'srv',variables('VMType'),parameters('incrementVersion'))]",
-        "osDiskType" : "Premium_LRS"
+        "osDiskType" : "StandardSSD_LRS"
     },
     "resources" : [
         {
