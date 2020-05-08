@@ -1,0 +1,108 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/deploymentTemplate.json#",
+    "contentVersion" : "1.0.0.0",
+    "parameters" : {
+        "customer" : {
+            "type" : "string",
+            "metadata" : {
+                "description" : "Customer name"
+            }
+        },
+        "deploymentLocation" : {
+            "type" : "string",
+            "allowedValues" : [
+                "westeurope",
+                "switzerlandwest"
+            ],
+            "defaultValue" : "westeurope",
+            "metadata" : {
+                "description" : "Deployment location"
+            }
+        },
+        "adminUsername" : {
+            "type" : "string",
+            "metadata" : {
+                "description" : "Name of the local admin"
+            }
+        },
+        "adminPassword" : {
+            "type" : "securestring"
+        },
+        "VMSku" : {
+            "type" : "string",
+            "allowedValues" : [
+                "Standard_DS2_v2",
+                "Standard_A2_v2"
+            ],
+            "defaultValue" : "Standard_DS2_v2",
+            "metadata" : {
+                "description" : "The type of SKU for the VM"
+            }
+        },
+        "NICRef" : {
+            "type" : "string"
+        },
+        "availabilitySetRef" : {
+            "type" : "string"
+        }
+    },
+    "variables" : {
+        "namingConvention" : "[toLower(concat(substring(parameters('customer'), 0, 4)))]",
+        "VMType" : "ads",
+        "VMName" : "[concat(variables('namingConvention'),'srv',variables('VMType'))]",
+        "osDiskType" : "Premium_LRS"
+    },
+    "resources" : [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[toUpper(variables('VMName'))]",
+            "apiVersion": "2018-10-01",
+            "tags" : {
+
+            },
+            "location": "[parameters('deploymentLocation')]",
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('VMSku')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name" : "[toUpper(concat(variables('VMName'),'_osdisk'))]",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('osDiskType')]"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-Core",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('NICRef')]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('VMName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "timeZone" : "W. Europe Standard Time",
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "availabilitySet": {
+                    "id": "[parameters('availabilitySetRef')]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

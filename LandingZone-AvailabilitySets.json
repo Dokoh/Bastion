@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion" : "1.0.0.0",
+    "parameters" : {
+        "customer" : {
+            "type" : "string",
+            "metadata" : {
+                "description" : "Customer name"
+            }
+        },
+        "deploymentLocation" : {
+            "type" : "string",
+            "allowedValues" : [
+                "westeurope",
+                "switzerlandwest"
+            ],
+            "defaultValue" : "westeurope",
+            "metadata" : {
+                "description" : "Deployment location"
+            }
+        },
+        "vmTypeToDeploy" : {
+            "type" : "string",
+            "allowedValues" : [
+                "DomainControllers",
+                "Firewall"
+            ],
+            "defaultValue" : "DomainControllers",
+            "metadata" : {
+                "description" : "Type of VM for which to create availability sets"
+            }
+        }
+    },
+    "variables" : {
+        "namingConvention" : "[toLower(concat(substring(parameters('customer'), 0, 4)))]",
+        "availabilitySetName" : "[if(equals(parameters('vmTypeToDeploy'),'DomainControllers'),concat(variables('namingConvention'),'_adds_avset'),concat(variables('namingConvention'),'_firewall_avset'))]",
+        "faultDomains" : 2,
+        "updateDomains" : 5,
+        "sku" : "Aligned"
+    },
+    "resources" : [
+        {
+            "apiVersion" : "2018-10-01",
+            "type" : "Microsoft.Compute/availabilitySets",
+            "name" : "[toUpper(variables('availabilitySetName'))]",
+            "location" : "[parameters('deploymentLocation')]",
+            "properties" : {
+                "platformUpdateDomainCount" : "[variables('updateDomains')]",
+                "platformFaultDomainCount" : "[variables('faultDomains')]"
+            },
+            "tags" : {},
+            "sku" : {
+                "name" : "[variables('sku')]"
+            }
+        }
+    ],
+    "outputs" : {
+        "AvailabilitySetRef" : {
+            "type" : "string",
+            "value" : "[resourceId('Microsoft.Compute/availabilitySets/',variables('availabilitySetName'))]"
+        }
+    }
+}

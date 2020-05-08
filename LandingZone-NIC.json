@@ -1,0 +1,71 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion" : "1.0.0.0",
+    "parameters" : {
+        "customer" : {
+            "type" : "string",
+            "metadata" : {
+                "description" : "Customer name"
+            }
+        },
+        "deploymentLocation" : {
+            "type" : "string",
+            "allowedValues" : [
+                "westeurope",
+                "switzerlandwest"
+            ],
+            "defaultValue" : "westeurope",
+            "metadata" : {
+                "description" : "Deployment location"
+            }
+        },
+        "vmTypeToDeploy" : {
+            "type" : "string",
+            "allowedValues" : [
+                "DomainControllers",
+                "Firewall"
+            ],
+            "defaultValue" : "DomainControllers",
+            "metadata" : {
+                "description" : "Type of VM for which to create network interface"
+            }
+        },
+        "subnetRef" : {
+            "type" : "string"
+        }
+    },
+    "variables" : {
+        "namingConvention" : "[toLower(concat(substring(parameters('customer'), 0, 4)))]",
+        "nicName" : "[if(equals(parameters('vmTypeToDeploy'),'DomainControllers'),concat(variables('namingConvention'),'srvads01-nic01'),concat(variables('namingConvention'),'_srvfrw01-nic01'))]"
+    },
+    "resources" : [
+        {
+            "type" : "Microsoft.Network/networkInterfaces",
+            "name" : "[toUpper(variables('nicName'))]",
+            "apiVersion" : "2018-08-01",
+            "tags" : {
+            },
+            "location" : "[parameters('deploymentLocation')]",
+            "properties" : {
+                "ipConfigurations" : [
+                    {
+                        "name" : "ipconfig1",
+                        "properties" : {
+                            "privateIPAllocationMethod" : "Dynamic",
+                            "subnet" : {
+                                "id" : "[parameters('subnetRef')]"
+                            }
+                        }
+                    }
+                ],
+                "enableIPForwarding": false
+            }
+        }
+    ],
+    "outputs" : {
+        "NICRef" : {
+            "type" : "string",
+            "value" : "[resourceId('Microsoft.Network/networkInterfaces/',variables('nicName'))]"
+        }
+    }
+}
